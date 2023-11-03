@@ -56,13 +56,9 @@ while(pc<len(mem)):
 
     if(op=="000000"):
         
-        # print(mem[pc][16:21])
         rs=binary_to_decimal(mem[pc][6:11])
         rt=binary_to_decimal(mem[pc][11:16])
         rd=binary_to_decimal(mem[pc][16:21])
-        # print("HI")
-        # print(regMem[rd])
-        # print(rd)
 
         HI=""
         LO=""
