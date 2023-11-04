@@ -138,9 +138,106 @@ def ID(opcode,control):
         rs=binary_to_decimal(mem[pc][6:11])
         rt=binary_to_decimal(mem[pc][11:16])
         imm=mem[pc][16:32]
+
+        mtr = 0
+        memw = 0
+        brnch = 0
+        alucont = "010"
+        alusrc = 1
+        regdst = 1
+        regwr = 1
+
+        if(opcode == "lw"):
+            mtr = 0
+            memw = 0
+            brnch = 0
+            alucont = "010"
+            alusrc = 1
+            regdst = 1
+            regwr = 1
+        elif(opcode == "sw"):
+            mtr = 0
+            memw = 1
+            brnch = 0
+            alucont = "010"
+            alusrc = 1
+            regdst = 1
+            regwr = 0
+
+        elif(opcode == "addi"):
+            mtr = 1
+            memw = 0
+            brnch = 0
+            alucont = "010"
+            alusrc = 1
+            regdst = 1
+            regwr = 1
+        
+        elif(opcode == "bgt"):
+            mtr = 1
+            memw = 0
+            brnch = 1
+            alucont = "111"# new alu_control signal for bgt
+            alusrc = 0
+            regdst = 1
+            regwr = 0
+        
+        elif(opcode == "beq"):
+            mtr = 0
+            memw = 0
+            brnch = 1
+            alucont = "011"
+            alusrc = 0
+            regdst = 1
+            regwr = 0
+        
+        elif(opcode == "lui"):
+            pass
+
+        elif(opcode == "ori"):
+            pass
+        
+        control_unit_assign(mtr,memw,brnch,alucont,alusrc,regdst,regwr,0)
         return [rs,rt,imm]
     
-def EX():
-    if()
+def EX(srcA,srcB,controller,imm = 0):
+
+    alu_control = controller.control_signals["AluControl"]
+    branch = controller.control_signals["Branch"]
+
+    if(not branch):
+        if(alu_control == "010"):
+            return srcA + srcB
+        elif(alu_control == "011"):
+            return srcA - srcB
+        elif(alu_control == "001"):
+            return srcA | srcB
+        elif(alu_control == "111"):
+            return srcA > srcB
+    else:
+        if(alu_control=="011"):
+            if(srcA == srcB):
+                return imm + 4
+            else: return 4
+        elif(alu_control == "111"):
+            if(srcA>srcB):
+                return imm+4
+            else: return 4
+
+def memory(controller,AluRes,writeData):
+    memw = controller.control_signals["MemWrite"]
+    if(memw):
+        dataMem[AluRes] = writeData
+        return
+    else:
+        return dataMem[AluRes]
+    
+def writeBack(controller,data,reg):
+    regWr = controller.control_signals["MemWrite"]
+    if(regWr):
+        regMem[reg] = data
+        return
+
+
 
 controller = control_unit("0000")
