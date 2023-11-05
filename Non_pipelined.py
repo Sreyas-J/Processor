@@ -50,7 +50,7 @@ dataMem[1] = decimal_to_binary(7,32)
 dataMem[2] = decimal_to_binary(10,32)
 
 while(pc<len(mem)):
-    print()
+    # print()
     op=mem[pc][0:6]
     # print(regMem[23])
 
