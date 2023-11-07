@@ -49,6 +49,7 @@ instructions={
     "j":decimal_to_binary(2,6),
     "sub":decimal_to_binary(0,6),
     "slt":decimal_to_binary(0,6),
+
     "bne":decimal_to_binary(5,6)
 } 
 
@@ -56,27 +57,38 @@ for i in range(32):
     regMem.append(0)
 
 # regMem[0] = 0
-regMem[9] = 3
+regMem[9] = 4
 regMem[10] = 0
-regMem[11] = 20
+regMem[11] = 24
+
 
 for i in range(200):
     dataMem.append("0"*8)
 
-dataMem[0] = decimal_to_binary(13,32)[0:8]
-dataMem[1] = decimal_to_binary(13,32)[8:16]
-dataMem[2] = decimal_to_binary(13,32)[16:24]
-dataMem[3] = decimal_to_binary(13,32)[24:32]
+a = decimal_to_binary(10,32)
+b= decimal_to_binary(6,32)
+c = decimal_to_binary(8,32)
+d=decimal_to_binary(100,32)
 
-dataMem[4] = decimal_to_binary(7,32)[0:8]
-dataMem[5] = decimal_to_binary(7,32)[8:16]
-dataMem[6] = decimal_to_binary(7,32)[16:24]
-dataMem[7] = decimal_to_binary(7,32)[24:32]
+dataMem[0] = a[0:8]
+dataMem[1] = a[8:16]
+dataMem[2] = a[16:24]
+dataMem[3] = a[24:32]
 
-dataMem[8] = decimal_to_binary(10,32)[0:8]
-dataMem[9] = decimal_to_binary(10,32)[8:16]
-dataMem[10] = decimal_to_binary(10,32)[16:24]
-dataMem[11] = decimal_to_binary(10,32)[24:32]
+dataMem[4] = b[0:8]
+dataMem[5] = b[8:16]
+dataMem[6] = b[16:24]
+dataMem[7] = b[24:32]
+
+dataMem[8] = c[0:8]
+dataMem[9] = c[8:16]
+dataMem[10] = c[16:24]
+dataMem[11] = c[24:32]
+
+dataMem[12] = d[0:8]
+dataMem[13] = d[8:16]
+dataMem[14] = d[16:24]
+dataMem[15] = d[24:32]
 
 class control_unit:
 
@@ -106,7 +118,6 @@ class control_unit:
     
     def alu_control(self):#return string
         if(self.op=="000000"):
-            # print("HI")
             funct = self.instruction[26:32]
             if(funct=="100000"):  #100001
                 return "010"
@@ -120,6 +131,8 @@ class control_unit:
                 return "100"
             elif(funct == "100001"):
                 return "010"
+            elif(funct == "000010"):
+                return "101"
 
 
 
@@ -128,18 +141,14 @@ def IF(instruction):
 
 def ID(opcode,control):
 
-    # funct = control.alu_control()
-    # print("j")
     if(opcode == "000000"):
         rs=binary_to_decimal(mem[pc][6:11])
         rt=binary_to_decimal(mem[pc][11:16])
         rd=binary_to_decimal(mem[pc][16:21])
 
         funct = control.alu_control()
-        # print(funct)
-        # print(funct)
 
-        control.control_unit_assign(1,0,0,funct,0,0,1,0)
+        control.control_unit_assign(1,0,0,funct,0,1,1,0)
 
         return [rs,rt,rd]
     
@@ -147,7 +156,22 @@ def ID(opcode,control):
 
         control.control_unit_assign(1,0,0,"0",0,0,0,1)
 
-        return [0,0,mem[pc][6:32]]
+        return [mem[pc][6:32]]
+    
+    elif(opcode == instructions["mul"]):
+            rs=binary_to_decimal(mem[pc][6:11])
+            rt=binary_to_decimal(mem[pc][11:16])
+            rd=binary_to_decimal(mem[pc][16:21])
+            # 1,0,0,funct,0,0,1,0
+            mtr = 1
+            memw = 0
+            brnch = 0
+            alucont = "101"
+            alusrc = 0
+            regdst = 1
+            regwr = 1
+            control.control_unit_assign(1,0,0,"101",0,1,1,0)
+            return[rs,rt,rd]
     
     else:
         rs=binary_to_decimal(mem[pc][6:11])
@@ -168,7 +192,7 @@ def ID(opcode,control):
             brnch = 0
             alucont = "010"
             alusrc = 1
-            regdst = 1
+            regdst = 0
             regwr = 1
         elif(opcode == instructions["sw"]):
             mtr = 0
@@ -176,7 +200,7 @@ def ID(opcode,control):
             brnch = 0
             alucont = "010"
             alusrc = 1
-            regdst = 1
+            regdst = 0
             regwr = 0
 
         elif(opcode == instructions["addi"]):
@@ -185,17 +209,17 @@ def ID(opcode,control):
             brnch = 0
             alucont = "010"
             alusrc = 1
-            regdst = 1
+            regdst = 0
             regwr = 1
         
-        elif(opcode == instructions["bgt"]):
+        elif(opcode == instructions["addiu"]):
             mtr = 1
-            memw = 0
-            brnch = 1
-            alucont = "111"# new alu_control signal for bgt
-            alusrc = 0
-            regdst = 1
-            regwr = 0
+            memw =0
+            brnch = 0
+            alucont = "010"
+            alusrc = 1
+            regdst = 0
+            regwr = 1
         
         elif(opcode == instructions["beq"]):
             mtr = 0
@@ -206,23 +230,22 @@ def ID(opcode,control):
             regdst = 1
             regwr = 0
         
-        elif(opcode == instructions["mul"]):
-            # 1,0,0,funct,0,0,1,0
-            mtr = 1
+        # elif(opcode == instructions["addu"]):
+        #     mtr = 1
+        #     memw = 0
+        #     brnch = 0
+        #     alucont = "010"
+        #     alusrc = 0
+        #     regdst = 0
+        #     regwr = 1
+        elif(opcode == instructions["bne"]):
+            mtr = 0
             memw = 0
-            brnch = 0
-            alucont = "101"
+            brnch = 1
+            alucont = "011"
             alusrc = 0
-            regdst = 0
-            regwr = 1
-        elif(opcode == instructions["addu"]):
-            mtr = 1
-            memw = 0
-            brnch = 0
-            alucont = "010"
-            alusrc = 0
-            regdst = 0
-            regwr = 1
+            regdst = 1
+            regwr = 0
         # elif(opcode == instructions["lui"]):
         #     pass
 
@@ -237,11 +260,22 @@ def EX(srcA,srcB,controller,imm = 0):
     alu_control = controller.control_signals["AluControl"]
     branch = controller.control_signals["Branch"]
     src = controller.control_signals["AluSrc"]
+    
+    if(branch):
+        if(alu_control == "111"):
+            if(srcA>srcB):
+                return imm+1
+            else: return 1
 
-    if(not branch and not src):
+    if(not src):
         if(alu_control == "010"):
             return srcA + srcB
         elif(alu_control == "011"):
+            if(controller.op == instructions["bne"]):
+                if(srcA - srcB==0):
+                    return 1
+                else: return 0
+            # if(pc==16):
             return srcA - srcB
         elif(alu_control == "001"):
             return srcA | srcB
@@ -249,7 +283,12 @@ def EX(srcA,srcB,controller,imm = 0):
             return srcA > srcB
         elif(alu_control == "101"):
             return srcA * srcB
-    elif(not branch and src):
+        elif(alu_control == "100"):
+            print("slt")
+            if(srcA < srcB):
+                return 1
+            else: return 0
+    elif(src):
         if(alu_control == "010"):
             return srcA + imm
         elif(alu_control == "011"):
@@ -260,15 +299,15 @@ def EX(srcA,srcB,controller,imm = 0):
             return srcA > imm
         elif(alu_control == "101"):
             return srcA * srcB
-    else:
-        if(alu_control=="011"):
-            if(srcA == srcB):
-                return imm + 1
-            else: return 1
-        elif(alu_control == "111"):
-            if(srcA>srcB):
-                return imm+1
-            else: return 1
+    # else:
+    #     if(alu_control=="011"):
+    #         if(srcA - srcB == 0):
+    #             return imm + 1
+    #         else: return 1
+    #     if(alu_control == "111"):
+    #         if(srcA>srcB):
+    #             return imm+1
+    #         else: return 1
 
 def memory(controller,AluRes,reg1):
     memw = controller.control_signals["MemWrite"]
@@ -285,9 +324,10 @@ def memory(controller,AluRes,reg1):
             dataMem[AluRes+2] = x[16:24]
             dataMem[AluRes+3] = x[24:32]
 
-            print()
+            # print()
             return 0
         else:
+            # print(AluRes)
             return binary_to_decimal(dataMem[AluRes] + dataMem[AluRes+1] + dataMem[AluRes+2] + dataMem[AluRes+3])
     else: return 0
     
@@ -314,7 +354,6 @@ def writeBack(controller,dataAlures,memdata,reg1,reg2):
         return
     mtr = controller.control_signals["MemtoReg"]
     regdst = controller.control_signals["RegDest"]
-
     if(mtr and regdst):
         regMem[reg1] = dataAlures
     if(not mtr and regdst):
@@ -326,9 +365,13 @@ def writeBack(controller,dataAlures,memdata,reg1,reg2):
 
 while(pc<len(mem)):
 
-    print(pc)
+    # regMem[0] = 0 
     
-    print("mem",dataMem)
+    with open("output.txt",'a') as file:
+        for i in dataMem:
+            file.write(i+',')
+        file.write('\n'+str(pc)+'\n')
+    # print(regMem[22],regMem[23])
 
     instruction = mem[pc]
     
@@ -337,15 +380,22 @@ while(pc<len(mem)):
     control = control_unit(instruction)
     print(control.op)
     l = ID(opcode,control)
-    # print(control.control_signals["MemWrite"])
+    if(len(l)==1):
+        pc = binary_to_decimal(l[0])
+        continue
+    alures = EX(regMem[l[0]],regMem[l[1]],control,l[2])  #000000 00000010010110100000100001
 
-    alures = EX(l[0],l[1],control,l[2])  #000000 00000010010110100000100001
+    if(control.control_signals["Branch"] and alures == 0):
+        pc = pc + 1 + l[2]
+        continue
 
     w = memory(control,alures,l[1])
+    print("rmem",regMem)
+    print(pc)
 
     pc = pc + 1
 
-    # writeBack(control,alures,w,)
+    # writeBack(control,alures,w,)S
     writeBack(control,alures,w,l[2],l[1])
 
 
