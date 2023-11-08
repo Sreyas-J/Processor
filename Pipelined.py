@@ -155,17 +155,10 @@ class INSTRUCTION:
     def updateInstr(self,instr):
         self.instruction = instr
 
-    def updateStage(self,stage):
-        self.stage=stage
-
-    def assignControlSignals(self,signals):
-        self.control_signals=signals
-
 
     def IF(self):
         IF_ID["opcode"] = self.instruction[0:6]
         IF_ID["instruction"] = self.instruction
-        # print(IF_ID["instruction"],"if_instruction")
         return
 
     def ID(self):
@@ -184,12 +177,9 @@ class INSTRUCTION:
             ID_Ex["list"] = [rs,rt,rd]
         
         elif(opcode=="000010"):
-            # print('HI')
             control.control_unit_assign(1,0,0,"0",0,0,0,1)
             global pc
             pc = binary_to_decimal(IF_ID["instruction"][6:32])
-            # IF_ID["instruction"] = "0"
-            # IF_ID["opcode"] = '0'
             return
         
         elif(opcode == instructions["mul"]):
@@ -264,14 +254,6 @@ class INSTRUCTION:
                 regdst = 1
                 regwr = 0
             
-            # elif(opcode == instructions["addu"]):
-            #     mtr = 1
-            #     memw = 0
-            #     brnch = 0
-            #     alucont = "010"
-            #     alusrc = 0
-            #     regdst = 0
-            #     regwr = 1
             elif(opcode == instructions["bne"]):
                 mtr = 0
                 memw = 0
@@ -280,25 +262,18 @@ class INSTRUCTION:
                 alusrc = 0
                 regdst = 1
                 regwr = 0
-            # elif(opcode == instructions["lui"]):
-            #     pass
-
-            # elif(opcode == instructions["ori"]):
-            #     pass
             
             control.control_unit_assign(mtr,memw,brnch,alucont,alusrc,regdst,regwr,0)
-            # print(rs,rt,imm,"ID")
-            # print(mem[pc],"ID")
             ID_Ex["list"]  = [rs,rt,imm]
+
+        global curr_instructions
+
+        if(("list" in Mem_WB) and (len(curr_instructions)==5) and (rs==Mem_WB["list"][2] or rt==Mem_WB["list"][2]) and curr_instructions[4].control.control_signals["MemWrite"]):
+            print("data hazard")
         ID_Ex["instruction"] = IF_ID['instruction']
         ID_Ex["opcode"] = IF_ID['opcode']
-        # print(ID_Ex["instruction"],"id_ex_instruction")
+
     def EX(self):
-        # if(ID_Ex["list"][2]==-1):
-        #     return
-        # print(pc,"pc")
-        # print("op",ID_Ex["opcode"])
-        # print(ID_Ex["list"])
         srcA = regMem[ID_Ex["list"][0]]
         srcB = regMem[ID_Ex["list"][1]]
         imm = ID_Ex["list"][2]
@@ -332,7 +307,6 @@ class INSTRUCTION:
                     if(srcA - srcB==0):
                         Ex_Mem["alures"] =  1
                     else: Ex_Mem["alures"] =  0
-                # if(pc==16):
                 Ex_Mem["alures"] =  srcA - srcB
             elif(alu_control == "001"):
                 Ex_Mem["alures"] =  srcA | srcB
@@ -341,7 +315,6 @@ class INSTRUCTION:
             elif(alu_control == "101"):
                 Ex_Mem["alures"] =  srcA * srcB
             elif(alu_control == "100"):
-                print("slt")
                 if(srcA < srcB):
                     Ex_Mem["alures"] =  1
                 else: Ex_Mem["alures"] =  0
@@ -367,45 +340,28 @@ class INSTRUCTION:
         if(self.control.control_signals["Branch"] and Ex_Mem["alures"]==0):
             pc = pc + 1 + ID_Ex["list"][2]
             return
-        # else:
-        #     if(alu_control=="011"):
-        #         if(srcA - srcB == 0):
-        #             return imm + 1
-        #         else: return 1
-        #     if(alu_control == "111"):
-        #         if(srcA>srcB):
-        #             return imm+1
-        #         else: return 1
         
     def memory(self):
-
-        # if(ID_Ex["list"][2]==-1):
-        #     return
-        
-
         controller = self.control
+        if(controller.control_signals["Branch"] and Mem_WB["alures"] == 0):
+            return
+        
         AluRes = Ex_Mem["alures"]
         reg1 = Ex_Mem["list"][1]
         
 
         memw = controller.control_signals["MemWrite"]
-        # print(memw)
         if(controller.op == instructions["lw"] or controller.op == instructions["sw"]):
             if(memw):
-                # dataMem[AluRes] = regMem[reg1]
-                # print(regMem[reg1])
+
                 x = decimal_to_binary(regMem[reg1],32)
-                # print("Fuck")
-                # print(controller.op)
                 dataMem[AluRes] = x[0:8]
                 dataMem[AluRes+1] = x[8:16]
                 dataMem[AluRes+2] = x[16:24]
                 dataMem[AluRes+3] = x[24:32]
 
-                # print()
                 Mem_WB["memdata"] =  0
             else:
-                # print(AluRes)
                 Mem_WB["memdata"] = binary_to_decimal(dataMem[AluRes] + dataMem[AluRes+1] + dataMem[AluRes+2] + dataMem[AluRes+3])
         else: Mem_WB["memdata"] = 0
 
@@ -415,31 +371,16 @@ class INSTRUCTION:
         Mem_WB["alures"] = Ex_Mem["alures"]
         
     def writeBack(self):
-        # if(ID_Ex["list"][2]==-1):
-        #     return
-
         controller = self.control
+        if(controller.control_signals["Branch"] and Mem_WB["alures"] == 0):
+            return
+
         dataAlures = Mem_WB["alures"]
         memdata = Mem_WB["memdata"]
         reg1 = Mem_WB["list"][2]
         reg2 = Mem_WB["list"][1]
-        # if(controller.control_signals["RegDest"]):
-        #     reg = reg2
-        # else:
-        #     reg = reg1
-
-        # regWr = controller.control_signals["RegWrite"]
-        # memtr = controller.control_signals["MemtoReg"]
-        # if(regWr and not memtr):
-        #     regMem[reg] = dataMem
-        #     return 
-        # elif(regWr and memtr):
-        #     regMem[reg] = dataAlures
-        #     return
 
         regw = controller.control_signals["RegWrite"]
-        # print(controller.instruction)
-        # print(regw)
         if(not regw):
             return
         mtr = controller.control_signals["MemtoReg"]
@@ -466,27 +407,6 @@ while(pc<len(mem)):
     n=len(curr_instructions)
 
     if(pc<len(mem)-4):
-
-        # curr_instructions[n-1].IF()
-        # # print(curr_instructions[n-1].instruction)
-
-        # if(n-2>=0):
-        #     curr_instructions[n-2].ID()
-        #     # print(curr_instructions[n-2].instruction)
-        # if(n-3>=0):
-        #     curr_instructions[n-3].EX()
-        #     # print(curr_instructions[n-3].instruction)
-        # if(n-4>=0):
-        #     curr_instructions[n-4].memory()
-        #     # print(curr_instructions[n-4].instruction)
-        # if(n-5>=0):
-        #     curr_instructions[n-5].writeBack()
-        #     # print(curr_instructions[n-5].instruction)
-        # if(n==5 and pc+1<len(mem)):
-        #     item = curr_instructions.popleft()
-        #     item.updateInstr(mem[pc+1])
-        #     curr_instructions.append(item)
-
 
         if(n-5>=0):
             curr_instructions[n-5].writeBack()
