@@ -1,3 +1,11 @@
-number_str = "00000000000000001111111111100000"
-number = int(number_str,2)
-print(number)
+from collections import deque
+
+queue = deque()
+
+# Enqueue
+queue.append(1)
+queue.append(2)
+
+# Dequeue
+item = queue.popleft()
+print(queue)
