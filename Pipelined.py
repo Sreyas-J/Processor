@@ -62,41 +62,41 @@ for i in range(32):
 # regMem[10] = 0
 # regMem[11] = 24
 
-regMem[10] = 0
-regMem[11] = 8
+# regMem[10] = 0
+# regMem[11] = 8
 for i in range(200):
     dataMem.append("0"*8)
 
-a=decimal_to_binary(5,32)
-dataMem[0] = a[0:8]
-dataMem[1] = a[8:16]
-dataMem[2] = a[16:24]
-dataMem[3] = a[24:32]
-
-# a = decimal_to_binary(10,32)
-# b= decimal_to_binary(6,32)
-# c = decimal_to_binary(8,32)
-# d=decimal_to_binary(100,32)
-
+# a=decimal_to_binary(5,32)
 # dataMem[0] = a[0:8]
 # dataMem[1] = a[8:16]
 # dataMem[2] = a[16:24]
 # dataMem[3] = a[24:32]
 
-# dataMem[4] = b[0:8]
-# dataMem[5] = b[8:16]
-# dataMem[6] = b[16:24]
-# dataMem[7] = b[24:32]
+a = decimal_to_binary(10,32)
+b= decimal_to_binary(6,32)
+c = decimal_to_binary(8,32)
+d=decimal_to_binary(100,32)
 
-# dataMem[8] = c[0:8]
-# dataMem[9] = c[8:16]
-# dataMem[10] = c[16:24]
-# dataMem[11] = c[24:32]
+dataMem[0] = a[0:8]
+dataMem[1] = a[8:16]
+dataMem[2] = a[16:24]
+dataMem[3] = a[24:32]
 
-# dataMem[12] = d[0:8]
-# dataMem[13] = d[8:16]
-# dataMem[14] = d[16:24]
-# dataMem[15] = d[24:32]
+dataMem[4] = b[0:8]
+dataMem[5] = b[8:16]
+dataMem[6] = b[16:24]
+dataMem[7] = b[24:32]
+
+dataMem[8] = c[0:8]
+dataMem[9] = c[8:16]
+dataMem[10] = c[16:24]
+dataMem[11] = c[24:32]
+
+dataMem[12] = d[0:8]
+dataMem[13] = d[8:16]
+dataMem[14] = d[16:24]
+dataMem[15] = d[24:32]
 
 class control_unit:
 
@@ -169,13 +169,13 @@ class INSTRUCTION:
         return
 
     def ID(self):
-        self.control = control_unit(self.instruction)
+        self.control = control_unit(IF_ID["instruction"])
         control = self.control
         opcode = IF_ID["opcode"]
         if(opcode == "000000"):
-            rs=binary_to_decimal(mem[pc][6:11])
-            rt=binary_to_decimal(mem[pc][11:16])
-            rd=binary_to_decimal(mem[pc][16:21])
+            rs=binary_to_decimal(IF_ID["instruction"][6:11])
+            rt=binary_to_decimal(IF_ID["instruction"][11:16])
+            rd=binary_to_decimal(IF_ID["instruction"][16:21])
 
             funct = control.alu_control()
 
@@ -187,12 +187,12 @@ class INSTRUCTION:
 
             control.control_unit_assign(1,0,0,"0",0,0,0,1)
 
-            ID_Ex["list"] = [mem[pc][6:32],-1,-1]
+            ID_Ex["list"] = [IF_ID["instruction"][6:32],-1,-1]
         
         elif(opcode == instructions["mul"]):
-                rs=binary_to_decimal(mem[pc][6:11])
-                rt=binary_to_decimal(mem[pc][11:16])
-                rd=binary_to_decimal(mem[pc][16:21])
+                rs=binary_to_decimal(IF_ID["instruction"][6:11])
+                rt=binary_to_decimal(IF_ID["instruction"][11:16])
+                rd=binary_to_decimal(IF_ID["instruction"][16:21])
                 # 1,0,0,funct,0,0,1,0
                 mtr = 1
                 memw = 0
@@ -205,9 +205,9 @@ class INSTRUCTION:
                 ID_Ex["list"] = [rs,rt,rd]
         
         else:
-            rs=binary_to_decimal(mem[pc][6:11])
-            rt=binary_to_decimal(mem[pc][11:16])
-            imm=binary_to_decimal(mem[pc][16:32])
+            rs=binary_to_decimal(IF_ID["instruction"][6:11])
+            rt=binary_to_decimal(IF_ID["instruction"][11:16])
+            imm=binary_to_decimal(IF_ID["instruction"][16:32])
 
             mtr = 0
             memw = 0
@@ -285,7 +285,7 @@ class INSTRUCTION:
             
             control.control_unit_assign(mtr,memw,brnch,alucont,alusrc,regdst,regwr,0)
             # print(rs,rt,imm,"ID")
-            print(mem[pc],"ID")
+            # print(mem[pc],"ID")
             ID_Ex["list"]  = [rs,rt,imm]
         ID_Ex["instruction"] = IF_ID['instruction']
         ID_Ex["opcode"] = IF_ID['opcode']
@@ -523,5 +523,9 @@ while(pc<len(mem)):
     print(Mem_WB,"Mem_WB")
     print(pc,"pc")
     print('\n\n')
+
+    print("regmem",regMem)
+    print("datamem",dataMem)
+
     pc = pc + 1
     
