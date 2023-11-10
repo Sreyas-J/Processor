@@ -64,7 +64,7 @@ for i in range(32):
 regMem[0] = 0
 regMem[9] = 4
 regMem[10] = 0
-regMem[11] = 24
+regMem[11] = 20
 
 # regMem[10] = 0
 # regMem[11] = 8
@@ -77,9 +77,9 @@ for i in range(200):
 # dataMem[2] = a[16:24]
 # dataMem[3] = a[24:32]
 
-a = decimal_to_binary(10,32)
-b= decimal_to_binary(8,32)
-c = decimal_to_binary(6,32)
+a = decimal_to_binary(8,32)
+b= decimal_to_binary(6,32)
+c = decimal_to_binary(10,32)
 d=decimal_to_binary(100,32)
 
 dataMem[0] = a[0:8]
