@@ -267,9 +267,9 @@ class INSTRUCTION:
             ID_Ex["list"]  = [rs,rt,imm]
 
         global curr_instructions
-
-        if(("list" in Mem_WB) and (len(curr_instructions)==5) and (rs==Mem_WB["list"][2] or rt==Mem_WB["list"][2]) and curr_instructions[4].control.control_signals["MemWrite"]):
-            print("data hazard")
+        # if(len(curr_instructions)==5):
+        #     if(("list" in Mem_WB) and (len(curr_instructions)==5) and (rs==Mem_WB["list"][2] or rt==Mem_WB["list"][2]) and curr_instructions[4].control.control_signals["MemWrite"]):
+        #         print("data hazard")
         ID_Ex["instruction"] = IF_ID['instruction']
         ID_Ex["opcode"] = IF_ID['opcode']
 
