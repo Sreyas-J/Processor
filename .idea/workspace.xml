@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b623a421-4e9f-4e5a-8be1-5ef7f431ee61" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Pipelined.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipelined.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/output.txt" beforeDir="false" afterPath="$PROJECT_DIR$/output.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,7 +49,7 @@
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <condition expression="pc&lt;100" language="Python" />
           <url>file://$PROJECT_DIR$/Pipelined.py</url>
-          <line>397</line>
+          <line>498</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

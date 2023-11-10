@@ -78,8 +78,8 @@ for i in range(200):
 # dataMem[3] = a[24:32]
 
 a = decimal_to_binary(10,32)
-b= decimal_to_binary(6,32)
-c = decimal_to_binary(8,32)
+b= decimal_to_binary(8,32)
+c = decimal_to_binary(6,32)
 d=decimal_to_binary(100,32)
 
 dataMem[0] = a[0:8]
@@ -284,20 +284,32 @@ class INSTRUCTION:
             
             control.control_unit_assign(mtr,memw,brnch,alucont,alusrc,regdst,regwr,0)
             ID_Ex["list"]  = [rs,rt,imm]
+            ID_Ex["imm"] = 1
 
         # global curr_instructions
         # global pc
-        if((len(curr_instructions)>=4) and ("list" in Ex_Mem and rs==Ex_Mem["list"][2]) and curr_instructions[2].control.control_signals["RegWrite"]):
-            if (curr_instructions[2].control.control_signals["MemtoReg"] == 1):
-                ID_Ex["rs"] = Ex_Mem["alures"]
-            # else:
-            #     ID_Ex["rs"] = Ex_Mem["memdata"]
+        if("imm" in Ex_Mem):
+            if ((len(curr_instructions) >= 4) and ("list" in Ex_Mem and rs == Ex_Mem["list"][1]) and curr_instructions[2].control.control_signals["RegWrite"]):
+                if (curr_instructions[2].control.control_signals["MemtoReg"] == 1):
+                    ID_Ex["rs"] = Ex_Mem["alures"]
+                else:
+                    ID_Ex["rsmem"] = 1
 
-        if ((len(curr_instructions) >= 4) and ("list" in Ex_Mem and rt == Ex_Mem["list"][2]) and curr_instructions[3].control.control_signals["RegWrite"]):
-            if (curr_instructions[2].control.control_signals["MemtoReg"] == 1):
-                ID_Ex["rt"] = Ex_Mem["alures"]
-            # else:
-            #     ID_Ex["rt"] = Ex_Mem["memdata"]
+            if ((len(curr_instructions) >= 4) and ("list" in Ex_Mem and rt == Ex_Mem["list"][1]) and curr_instructions[2].control.control_signals["RegWrite"]):
+                if (curr_instructions[2].control.control_signals["MemtoReg"] == 1):
+                    ID_Ex["rtmem"] = 1
+        else:
+            if((len(curr_instructions)>=4) and ("list" in Ex_Mem and rs==Ex_Mem["list"][2]) and curr_instructions[2].control.control_signals["RegWrite"]):
+                if (curr_instructions[2].control.control_signals["MemtoReg"] == 1):
+                    ID_Ex["rs"] = Ex_Mem["alures"]
+                else:
+                    ID_Ex["rsmem"] = 1
+
+            if ((len(curr_instructions) >= 4) and ("list" in Ex_Mem and rt == Ex_Mem["list"][2]) and curr_instructions[2].control.control_signals["RegWrite"]):
+                if (curr_instructions[2].control.control_signals["MemtoReg"] == 1):
+                    ID_Ex["rt"] = Ex_Mem["alures"]
+                else:
+                    ID_Ex["rtmem"] = 1
 
         if((len(curr_instructions)==5) and ("list" in Mem_WB and rs==Mem_WB["list"][2]) and curr_instructions[0].control.control_signals["RegWrite"]):
             print("data hazard")
@@ -313,7 +325,7 @@ class INSTRUCTION:
                 ID_Ex["rt"] = Mem_WB["alures"]
             else:
                 ID_Ex["rt"] = Mem_WB["memdata"]
-        
+
         # if(pc == 4):
             # print(ID_Ex["rt"],"srcs to cum")
 
@@ -324,16 +336,26 @@ class INSTRUCTION:
     def EX(self):
         print("ex")
         global Ex_Mem
+        if("imm" in ID_Ex):
+            Ex_Mem["imm"] = 1
+            ID_Ex.pop("imm")
+
         if(len(ID_Ex)==0):
             Ex_Mem={}
             return
         if("rs" in ID_Ex):
             srcA = ID_Ex["rs"]
             ID_Ex.pop("rs")
+        elif("rsmem" in ID_Ex):
+            srcA = Mem_WB["memdata"]
+            ID_Ex.pop("rsmem")
         else: srcA = regMem[ID_Ex["list"][0]]
         if("rt" in ID_Ex):
             srcB = ID_Ex["rt"]
             ID_Ex.pop("rt")
+        elif("rtmem" in Ex_Mem):
+            srcB = Mem_WB["memdata"]
+            ID_Ex.pop("rtmem")
         else: srcB = regMem[ID_Ex["list"][1]]
         imm = ID_Ex["list"][2]
         controller = self.control
@@ -406,6 +428,9 @@ class INSTRUCTION:
             return
         
     def memory(self):
+        global Ex_Mem
+        if ("imm" in Ex_Mem):
+            Ex_Mem.pop("imm")
         print("mem")
         global Mem_WB
         if(len(Ex_Mem)==0):
@@ -425,10 +450,10 @@ class INSTRUCTION:
             if(memw):
 
                 x = decimal_to_binary(regMem[reg1],32)
-                dataMem[AluRes] = x[24:32]
-                dataMem[AluRes+1] = x[16:24]
-                dataMem[AluRes+2] = x[8:16]
-                dataMem[AluRes+3] = x[0:8]
+                dataMem[AluRes] = x[0:8]
+                dataMem[AluRes+1] = x[8:16]
+                dataMem[AluRes+2] = x[16:24]
+                dataMem[AluRes+3] = x[24:32]
 
                 Mem_WB["memdata"] =  0
             else:
