@@ -374,10 +374,10 @@ while(pc<len(mem)):
 
     # regMem[0] = 0 
     
-    with open("output.txt",'a') as file:
-        for i in dataMem:
-            file.write(i+',')
-        file.write('\n'+str(pc)+'\n')
+    # with open("output.txt",'a') as file:
+    #     for i in dataMem:
+    #         file.write(i+',')
+    #     file.write('\n'+str(pc)+'\n')
     # print(regMem[22],regMem[23])
 
     instruction = mem[pc]
