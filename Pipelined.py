@@ -1,6 +1,5 @@
 import os
 from collections import deque
-import threading
 
 # instr_begg = 2**20
 pc=0
@@ -77,10 +76,10 @@ for i in range(200):
 # dataMem[2] = a[16:24]
 # dataMem[3] = a[24:32]
 
-a = decimal_to_binary(8,32)
-b= decimal_to_binary(6,32)
-c = decimal_to_binary(10,32)
-d=decimal_to_binary(100,32)
+a = decimal_to_binary(2,32)
+b= decimal_to_binary(1,32)
+c = decimal_to_binary(100,32)
+d=decimal_to_binary(10,32)
 
 dataMem[0] = a[0:8]
 dataMem[1] = a[8:16]
@@ -285,6 +284,8 @@ class INSTRUCTION:
             control.control_unit_assign(mtr,memw,brnch,alucont,alusrc,regdst,regwr,0)
             ID_Ex["list"]  = [rs,rt,imm]
             ID_Ex["imm"] = 1
+            if(opcode == instructions["beq"] or opcode == instructions["bne"]):
+                ID_Ex.pop("imm")
 
         # global curr_instructions
         # global pc
@@ -297,6 +298,8 @@ class INSTRUCTION:
 
             if ((len(curr_instructions) >= 4) and ("list" in Ex_Mem and rt == Ex_Mem["list"][1]) and curr_instructions[2].control.control_signals["RegWrite"]):
                 if (curr_instructions[2].control.control_signals["MemtoReg"] == 1):
+                    ID_Ex["rt"] = Ex_Mem["alures"]
+                else:
                     ID_Ex["rtmem"] = 1
         else:
             if((len(curr_instructions)>=4) and ("list" in Ex_Mem and rs==Ex_Mem["list"][2]) and curr_instructions[2].control.control_signals["RegWrite"]):
@@ -311,20 +314,37 @@ class INSTRUCTION:
                 else:
                     ID_Ex["rtmem"] = 1
 
-        if((len(curr_instructions)==5) and ("list" in Mem_WB and rs==Mem_WB["list"][2]) and curr_instructions[0].control.control_signals["RegWrite"]):
-            print("data hazard")
-            # print(Mem_WB,"MEM2")
-            if(curr_instructions[0].control.control_signals["MemtoReg"]==1):
-                ID_Ex["rs"] = Mem_WB["alures"]
-            else:
-                ID_Ex["rs"] = Mem_WB["memdata"]
 
-        if((len(curr_instructions)==5) and ("list" in Mem_WB and rt==Mem_WB["list"][2]) and curr_instructions[0].control.control_signals["RegWrite"]):
-            print("Data")
-            if(curr_instructions[0].control.control_signals["MemtoReg"]==1):
-                ID_Ex["rt"] = Mem_WB["alures"]
-            else:
-                ID_Ex["rt"] = Mem_WB["memdata"]
+        if("imm" in Mem_WB):
+            if ((len(curr_instructions) == 5) and ("list" in Mem_WB and rs == Mem_WB["list"][1]) and curr_instructions[0].control.control_signals["RegWrite"]):
+                print("data hazard")
+                # print(Mem_WB,"MEM2")
+                if (curr_instructions[0].control.control_signals["MemtoReg"] == 1):
+                    ID_Ex["rs"] = Mem_WB["alures"]
+                else:
+                    ID_Ex["rs"] = Mem_WB["memdata"]
+
+            if ((len(curr_instructions) == 5) and ("list" in Mem_WB and rt == Mem_WB["list"][1]) and curr_instructions[0].control.control_signals["RegWrite"]):
+                print("Data")
+                if (curr_instructions[0].control.control_signals["MemtoReg"] == 1):
+                    ID_Ex["rt"] = Mem_WB["alures"]
+                else:
+                    ID_Ex["rt"] = Mem_WB["memdata"]
+        else:
+            if((len(curr_instructions)==5) and ("list" in Mem_WB and rs==Mem_WB["list"][2]) and curr_instructions[1].control.control_signals["RegWrite"]):
+                print("data hazard")
+                # print(Mem_WB,"MEM2")
+                if(curr_instructions[1].control.control_signals["MemtoReg"]==1):
+                    ID_Ex["rs"] = Mem_WB["alures"]
+                else:
+                    ID_Ex["rs"] = Mem_WB["memdata"]
+
+            if((len(curr_instructions)==5) and ("list" in Mem_WB and rt==Mem_WB["list"][2]) and curr_instructions[1].control.control_signals["RegWrite"]):
+                print("Data")
+                if(curr_instructions[1].control.control_signals["MemtoReg"]==1):
+                    ID_Ex["rt"] = Mem_WB["alures"]
+                else:
+                    ID_Ex["rt"] = Mem_WB["memdata"]
 
         # if(pc == 4):
             # print(ID_Ex["rt"],"srcs to cum")
@@ -393,7 +413,8 @@ class INSTRUCTION:
                     if(srcA - srcB==0):
                         Ex_Mem["alures"] =  1
                     else: Ex_Mem["alures"] =  0
-                Ex_Mem["alures"] =  srcA - srcB
+                else:
+                    Ex_Mem["alures"] =  srcA - srcB
             elif(alu_control == "001"):
                 Ex_Mem["alures"] =  srcA | srcB
             elif(alu_control == "111"):
@@ -429,10 +450,11 @@ class INSTRUCTION:
         
     def memory(self):
         global Ex_Mem
+        global Mem_WB
         if ("imm" in Ex_Mem):
             Ex_Mem.pop("imm")
+            Mem_WB["imm"] = 1
         print("mem")
-        global Mem_WB
         if(len(Ex_Mem)==0):
             Mem_WB={}
             return
@@ -467,6 +489,8 @@ class INSTRUCTION:
         
     def writeBack(self):
         print("wb")
+        if("imm" in Mem_WB):
+            Mem_WB.pop("imm")
         if(len(Mem_WB)==0):
             return
         controller = self.control
@@ -508,7 +532,7 @@ while(pc<len(mem)):
 
     n=len(curr_instructions)
 
-    if(pc<len(mem)-4):
+    if(pc<len(mem)):
 
         if(n-5>=0):
             if(pc==4):
@@ -546,17 +570,17 @@ while(pc<len(mem)):
 
     else:
         if(len(mem)-pc==4):
+            curr_instructions[n-5].writeBack()
+            curr_instructions[n-4].memory()
+            curr_instructions[n-3].EX()
             curr_instructions[n-2].ID()
-            curr_instructions[n-3].EX()
-            curr_instructions[n-4].memory()
-            curr_instructions[n-5].writeBack()
         elif(len(mem)-pc==3):
+            curr_instructions[n-5].writeBack()
+            curr_instructions[n-4].memory()
             curr_instructions[n-3].EX()
-            curr_instructions[n-4].memory()
-            curr_instructions[n-5].writeBack()
         elif(len(mem)-pc==2):
-            curr_instructions[n-4].memory()
             curr_instructions[n-5].writeBack()
+            curr_instructions[n-4].memory()
         elif(len(mem)==1):
             curr_instructions[n-5].writeBack()
     print(IF_ID,"if_id")
