@@ -4,7 +4,7 @@ from collections import deque
 clock=0
 pc = 0
 mem = []
-file_path = "Sorting.txt"
+file_path = "Factorial.txt"
 dataMem = []
 regMem = []
 
@@ -78,36 +78,36 @@ regMem[11] = 20
 for i in range(200):
     dataMem.append("0" * 8)
 
-# a=decimal_to_binary(5,32)
-# dataMem[0] = a[0:8]
-# dataMem[1] = a[8:16]
-# dataMem[2] = a[16:24]
-# dataMem[3] = a[24:32]
-
-a = decimal_to_binary(2, 32)
-b = decimal_to_binary(-3, 32)
-c = decimal_to_binary(100, 32)
-d = decimal_to_binary(10, 32)
-
+a=decimal_to_binary(5,32)
 dataMem[0] = a[0:8]
 dataMem[1] = a[8:16]
 dataMem[2] = a[16:24]
 dataMem[3] = a[24:32]
 
-dataMem[4] = b[0:8]
-dataMem[5] = b[8:16]
-dataMem[6] = b[16:24]
-dataMem[7] = b[24:32]
+# a = decimal_to_binary(2, 32)
+# b = decimal_to_binary(-3, 32)
+# c = decimal_to_binary(100, 32)
+# d = decimal_to_binary(10, 32)
 
-dataMem[8] = c[0:8]
-dataMem[9] = c[8:16]
-dataMem[10] = c[16:24]
-dataMem[11] = c[24:32]
+# dataMem[0] = a[0:8]
+# dataMem[1] = a[8:16]
+# dataMem[2] = a[16:24]
+# dataMem[3] = a[24:32]
 
-dataMem[12] = d[0:8]
-dataMem[13] = d[8:16]
-dataMem[14] = d[16:24]
-dataMem[15] = d[24:32]
+# dataMem[4] = b[0:8]
+# dataMem[5] = b[8:16]
+# dataMem[6] = b[16:24]
+# dataMem[7] = b[24:32]
+
+# dataMem[8] = c[0:8]
+# dataMem[9] = c[8:16]
+# dataMem[10] = c[16:24]
+# dataMem[11] = c[24:32]
+
+# dataMem[12] = d[0:8]
+# dataMem[13] = d[8:16]
+# dataMem[14] = d[16:24]
+# dataMem[15] = d[24:32]
 
 
 class control_unit:

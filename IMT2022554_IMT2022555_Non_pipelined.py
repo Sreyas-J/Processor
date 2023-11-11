@@ -151,9 +151,13 @@ class control_unit:
                 return "101"
 
 def IF(instruction):
+    global clock
+    clock+=1
     return instruction[0:6]
 
 def ID(opcode,control):
+    global clock
+    clock+=1
 
     if(opcode == "000000"):
         rs=binary_to_decimal(mem[pc][6:11])
@@ -257,6 +261,8 @@ def ID(opcode,control):
         return [rs,rt,imm]
     
 def EX(srcA,srcB,controller,imm = 0):
+    global clock
+    clock+=1
 
     alu_control = controller.control_signals["AluControl"]
     branch = controller.control_signals["Branch"]
@@ -300,6 +306,8 @@ def EX(srcA,srcB,controller,imm = 0):
             return srcA * srcB
 
 def memory(controller,AluRes,reg1):
+    global clock
+    clock+=1
     memw = controller.control_signals["MemWrite"]
     if(controller.op == instructions["lw"] or controller.op == instructions["sw"]):
         if(memw):
@@ -315,6 +323,8 @@ def memory(controller,AluRes,reg1):
     else: return 0
     
 def writeBack(controller,dataAlures,memdata,reg1,reg2):
+    global clock
+    clock+=1
 
     regw = controller.control_signals["RegWrite"]
 
@@ -353,8 +363,6 @@ while(pc<len(mem)):
     print()
     writeBack(control,alures,w,l[2],l[1])
     pc = pc + 1
-    clock+=1
-
 
 print("-------------------------------------------------------------------------------------------------------------------------")
 print("clock cycles: ",clock)
