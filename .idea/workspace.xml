@@ -8,10 +8,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b623a421-4e9f-4e5a-8be1-5ef7f431ee61" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Processor.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Processor.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Pipelined.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipelined.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/p.py" beforeDir="false" afterPath="$PROJECT_DIR$/p.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,14 +95,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <condition expression="pc==19" language="Python" />
-          <url>file://$PROJECT_DIR$/Pipelined.py</url>
-          <line>522</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
-      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -117,10 +108,6 @@
         <watch expression="pc" />
         <watch expression="dataMem" />
         <watch expression="curr_instructions" />
-        <watch expression="dataMem[23]" />
-        <watch expression="dataMem[27]" />
-        <watch expression="dataMem[31]" />
-        <watch expression="dataMem[35]" />
         <watch expression="Ex_Mem" />
         <watch expression="ID_Ex" />
         <watch expression="IF_ID" />
