@@ -288,7 +288,7 @@ class INSTRUCTION:
             if (opcode == instructions["beq"] or opcode == instructions["bne"]):
                 ID_Ex.pop("imm")
 
-        if ("imm" in Ex_Mem):
+        if ("imm" in Ex_Mem):#forwarding from ex stage, I type destination is in list[1]
             if ((len(curr_instructions) >= 4) and ("list" in Ex_Mem and rs == Ex_Mem["list"][1]) and
                     curr_instructions[2].control.control_signals["RegWrite"]):
                 if (curr_instructions[2].control.control_signals["MemtoReg"] == 1):
@@ -302,7 +302,7 @@ class INSTRUCTION:
                     ID_Ex["rt"] = Ex_Mem["alures"]
                 else:
                     ID_Ex["rtmem"] = 1
-        else:
+        else:#forwarding from ex stage, R type destination in list[2]
             if ((len(curr_instructions) >= 4) and ("list" in Ex_Mem and rs == Ex_Mem["list"][2]) and
                     curr_instructions[2].control.control_signals["RegWrite"]):
                 if (curr_instructions[2].control.control_signals["MemtoReg"] == 1):
@@ -317,10 +317,10 @@ class INSTRUCTION:
                 else:
                     ID_Ex["rtmem"] = 1
 
-        if ("imm" in Mem_WB):
+        if ("imm" in Mem_WB):# forwarding from memory stage, I format dest in list[1]
             if ((len(curr_instructions) == 5) and ("list" in Mem_WB and rs == Mem_WB["list"][1]) and
                     curr_instructions[0].control.control_signals["RegWrite"]):
-                if (curr_instructions[0].control.control_signals["MemtoReg"] == 1):
+                if (curr_instructions[0].control.control_signals["MemtoReg"] == 1):# depending on memToReg, respective alures or memWb is written into rs/rt
                     ID_Ex["rs"] = Mem_WB["alures"]
                 else:
                     ID_Ex["rs"] = Mem_WB["memdata"]
@@ -331,10 +331,10 @@ class INSTRUCTION:
                     ID_Ex["rt"] = Mem_WB["alures"]
                 else:
                     ID_Ex["rt"] = Mem_WB["memdata"]
-        else:
+        else:# forwarding from memory stage, R format dest in list[2]
             if ((len(curr_instructions) == 5) and ("list" in Mem_WB and rs == Mem_WB["list"][2]) and
                     curr_instructions[1].control.control_signals["RegWrite"]):
-                if (curr_instructions[1].control.control_signals["MemtoReg"] == 1):
+                if (curr_instructions[1].control.control_signals["MemtoReg"] == 1):# depending on memToReg, respective alures or memWb is written into rs/rt
                     ID_Ex["rs"] = Mem_WB["alures"]
                 else:
                     ID_Ex["rs"] = Mem_WB["memdata"]
@@ -358,10 +358,10 @@ class INSTRUCTION:
         if (len(ID_Ex) == 0):
             Ex_Mem = {}
             return
-        if ("rs" in ID_Ex):
+        if ("rs" in ID_Ex):# detecting hazard at rs and correcting it, and using forwarded value
             srcA = ID_Ex["rs"]
             ID_Ex.pop("rs")
-        elif ("rsmem" in ID_Ex):
+        elif ("rsmem" in ID_Ex):#getting data of previous instruction if data changes due to memory stage
             srcA = Mem_WB["memdata"]
             ID_Ex.pop("rsmem")
         else:
@@ -384,7 +384,7 @@ class INSTRUCTION:
         src = controller.control_signals["AluSrc"]
 
         if (branch):
-            if (alu_control == "111"):
+            if (alu_control == "111"):#bgt
                 if (srcA > srcB):
                     Ex_Mem["alures"] = imm + 1
                     Ex_Mem["opcode"] = ID_Ex["opcode"]
@@ -437,7 +437,7 @@ class INSTRUCTION:
         Ex_Mem["instruction"] = ID_Ex["instruction"]
         Ex_Mem["list"] = ID_Ex["list"]
 
-        if (self.control.control_signals["Branch"] and Ex_Mem["alures"] == 0):
+        if (self.control.control_signals["Branch"] and Ex_Mem["alures"] == 0):#beq
             pc = pc - 2 + ID_Ex["list"][2]
             return
 
@@ -481,7 +481,7 @@ class INSTRUCTION:
         Mem_WB["alures"] = Ex_Mem["alures"]
 
     def writeBack(self):
-        print("wb")
+        # print("wb")
         if ("imm" in Mem_WB):
             Mem_WB.pop("imm")
         if (len(Mem_WB) == 0):
